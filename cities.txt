@@ -1,0 +1,18 @@
+python tiledownloader.py 121764.23 487175.93 5000 Amsterdam
+python tiledownloader.py 92910.10 435561.92 5000 Rotterdam
+python tiledownloader.py 81918 454555 5000 Den Haag
+python tiledownloader.py 135582.8 456511.0 5000 Utrecht
+python tiledownloader.py 176932.55 317434.65 5000 Maastrich
+python tiledownloader.py 234120.18 582140.35 5000 Groningen
+python tiledownloader.py 143624.8 487191.7 5000 Almere
+python tiledownloader.py 32137 391231 5000 Middelburg
+python tiledownloader.py 84425.7 446793.1 5000 Delft
+python tiledownloader.py 161108 383706 5000 Eindhoven
+python tiledownloader.py 233576.5 557695.3 Assen
+python tiledownloader.py 202988 502992 5000 Zwolle
+python tiledownloader.py 209174.1 474692.6 5000 Deventer
+python tiledownloader.py 258111.4 492188.2 5000 Ootmarsum
+python tiledownloader.py 145200 525512 5000 Enkhuizen
+python tiledownloader.py 115652 566376 10000 Texel
+python tiledownloader.py 134480.4 499420.8 5000 Volendam
+python tiledownloader.py 93816.1 463854.4 5000 Leiden
