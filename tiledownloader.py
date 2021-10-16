@@ -32,14 +32,13 @@ def download_3dbag(tile_ids, tilesdir):
     url = CITYJSON_URL.format(TID=tid)
     logging.info(url)
     fname = tilesdir / (tid+'.json')
-    fnames.append(fname)
-    if not fname.exists():
-      try:
-        with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
-          data = response.read() # a `bytes` object
-          out_file.write( gzip.decompress(data) )
-      except urllib.error.HTTPError as err:
-        logging.warning(err)
+    try:
+      with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
+        data = response.read() # a `bytes` object
+        out_file.write( gzip.decompress(data) )
+        fnames.append(fname)
+    except urllib.error.HTTPError as err:
+      logging.warning(err)
   
   return fnames
 
