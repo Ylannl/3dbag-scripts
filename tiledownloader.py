@@ -1,9 +1,13 @@
-from owslib.wfs import WebFeatureService
 import json
 import urllib
 import gzip
 import argparse
+from pathlib import Path
+import subprocess
+import multiprocessing
+
 from cjio import cityjson
+from owslib.wfs import WebFeatureService
 
 CITYJSON_URL = "https://data.3dbag.nl/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json.gz"
 
@@ -11,7 +15,7 @@ def bbox_from_poi(poi, radius):
   x, y = poi
   return [ x-radius, y-radius, x+radius, y+radius ]
 
-def get_tile_ids(bbox=(120389,485945,121389,486045)):
+def get_tile_ids(bbox):
   wfs11 = WebFeatureService(url='https://data.3dbag.nl/api/BAG3D_v2/wfs', version='1.1.0')
   response = wfs11.getfeature(typename='BAG3D_v2:bag_tiles_3k', bbox=bbox, srsname='urn:x-ogc:def:crs:EPSG:28992', outputFormat='json')
 
@@ -20,12 +24,12 @@ def get_tile_ids(bbox=(120389,485945,121389,486045)):
 
   return tile_ids
 
-def download_3dbag(tile_ids):
+def download_3dbag(tile_ids, tilesdir):
   fnames = []
   for tid in tile_ids:
     url = CITYJSON_URL.format(TID=tid)
     print(url)
-    fname = tid+'.json'
+    fname = tilesdir / (tid+'.json')
     fnames.append(fname)
     with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
       data = response.read() # a `bytes` object
@@ -59,8 +63,6 @@ def prepf(file):
   return cm
 
 def prep_for_blender(files, fout='x.obj', origin_offset = (0,0)):
-  import multiprocessing
-
   pool_obj = multiprocessing.Pool()
 
   print('prepping cm\'s...')
@@ -87,17 +89,34 @@ if __name__ == '__main__':
   # radius = 1000
   # city_name = 'deventer'
   parser = argparse.ArgumentParser()
-  parser.add_argument("poi", help="point of interest", nargs=2, type=float)
+  parser.add_argument("poi", help="point of interest in RD coordinates", nargs=2, type=float)
   parser.add_argument("radius", help="radius of bounding box around poi", type=float, default=1000)
-  parser.add_argument("fout", help="name of output obj file", type=str)
+  parser.add_argument("pathname", help="name of output dir", type=str)
   args = parser.parse_args()
 
-  # print('getting tile ids...')
-  # tids = get_tile_ids( bbox_from_poi(args.poi, args.radius) )
-  # print('downloading tiles...')
-  # fnames = download_3dbag(tids)
-  # print('prepping for blender...')
-  # prep_for_blender(fnames, args.fout', origin_offset=args.poi)
+  print('getting tile ids...')
+  tids = get_tile_ids( bbox_from_poi(args.poi, args.radius) )
+  
+  print('creating output directory...')
+  path = Path(args.pathname)
+  projectname = path.stem
+  path.mkdir(parents=True)
 
-  with open('blendersetup.py', 'w') as f:
-    f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', global_clight_size=0, axis_forward='Y', axis_up='Z')".format(args.fout))
+  print('downloading tiles...')
+  tilesdir = path / 'cityjson'
+  tilesdir.mkdir()
+  fnames = download_3dbag(tids, tilesdir)
+  
+  print('export to obj...')
+  objpath = (path / projectname).with_suffix('.obj')
+  blendpath = (path / projectname).with_suffix('.blend')
+  blendpy = path / 'blendersetup.py'
+  prep_for_blender(fnames, objpath, origin_offset=args.poi)
+
+  print('preppring blend file')
+  with open( blendpy, 'w' ) as f:
+    f.write("import bpy\n")
+    f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', axis_forward='Y', axis_up='Z')\n".format( objpath ))
+    f.write("bpy.ops.wm.save_as_mainfile(filepath='{}')\n".format(blendpath))
+  
+  subprocess.run(['blender', 'base.blend', '--background', '--python', blendpy])
