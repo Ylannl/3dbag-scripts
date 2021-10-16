@@ -2,6 +2,7 @@ from owslib.wfs import WebFeatureService
 import json
 import urllib
 import gzip
+import argparse
 from cjio import cityjson
 
 CITYJSON_URL = "https://data.3dbag.nl/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json.gz"
@@ -81,14 +82,22 @@ def prep_for_blender(files, fout='x.obj', origin_offset = (0,0)):
     re = cm.export2obj()
     fo.write(re.getvalue())
 
-if __name__ == "__main__":
-  poi = (207515.1,474217.3)
-  radius = 500
-  city_name = 'deventer'
+if __name__ == '__main__':
+  # poi = (207515.1,474217.3)
+  # radius = 1000
+  # city_name = 'deventer'
+  parser = argparse.ArgumentParser()
+  parser.add_argument("poi", help="point of interest", nargs=2, type=float)
+  parser.add_argument("radius", help="radius of bounding box around poi", type=float, default=1000)
+  parser.add_argument("fout", help="name of output obj file", type=str)
+  args = parser.parse_args()
 
-  print('getting tile ids...')
-  tids = get_tile_ids( bbox_from_poi(poi, radius) )
-  print('downloading tiles...')
-  fnames = download_3dbag(tids)
-  print('prepping for blender...')
-  prep_for_blender(fnames, city_name+'.obj', origin_offset=poi)
+  # print('getting tile ids...')
+  # tids = get_tile_ids( bbox_from_poi(args.poi, args.radius) )
+  # print('downloading tiles...')
+  # fnames = download_3dbag(tids)
+  # print('prepping for blender...')
+  # prep_for_blender(fnames, args.fout', origin_offset=args.poi)
+
+  with open('blendersetup.py', 'w') as f:
+    f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', global_clight_size=0, axis_forward='Y', axis_up='Z')".format(args.fout))
