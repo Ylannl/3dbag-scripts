@@ -5,6 +5,8 @@ import argparse
 from pathlib import Path
 import subprocess
 import multiprocessing
+import logging
+import sys
 
 from cjio import cityjson
 from owslib.wfs import WebFeatureService
@@ -28,12 +30,16 @@ def download_3dbag(tile_ids, tilesdir):
   fnames = []
   for tid in tile_ids:
     url = CITYJSON_URL.format(TID=tid)
-    print(url)
+    logging.info(url)
     fname = tilesdir / (tid+'.json')
     fnames.append(fname)
-    with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
-      data = response.read() # a `bytes` object
-      out_file.write( gzip.decompress(data) )
+    if not fname.exists():
+      try:
+        with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
+          data = response.read() # a `bytes` object
+          out_file.write( gzip.decompress(data) )
+      except urllib.error.HTTPError as err:
+        logging.warning(err)
   
   return fnames
 
@@ -65,21 +71,21 @@ def prepf(file):
 def prep_for_blender(files, fout='x.obj', origin_offset = (0,0)):
   pool_obj = multiprocessing.Pool()
 
-  print('prepping cm\'s...')
+  logging.info('prepping cm\'s...')
   cms = pool_obj.map(prepf,files)
-  # print(answer)
+  # logging.info(answer)
   
-  print('merging cm\'s...')
+  logging.info('merging cm\'s...')
   cms[0].merge(cms[1:])
   cm = cms[0]
 
-  print('shifting origin...')
+  logging.info('shifting origin...')
   # move to origin, notice that the transform object is gone after merging and the vertices are floats with the full coordinates
   for v in cm.j['vertices']:
     v[0] -= origin_offset[0]
     v[1] -= origin_offset[1]
 
-  print('writing obj...')
+  logging.info('writing obj...')
   with open(fout, mode='w') as fo:
     re = cm.export2obj()
     fo.write(re.getvalue())
@@ -94,26 +100,36 @@ if __name__ == '__main__':
   parser.add_argument("pathname", help="name of output dir", type=str)
   args = parser.parse_args()
 
-  print('getting tile ids...')
+  # setup logger
+  root = logging.getLogger()
+  root.setLevel(logging.INFO)
+
+  handler = logging.StreamHandler(sys.stdout)
+  handler.setLevel(logging.INFO)
+  formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+  handler.setFormatter(formatter)
+  root.addHandler(handler)
+
+  logging.info('getting tile ids...')
   tids = get_tile_ids( bbox_from_poi(args.poi, args.radius) )
   
-  print('creating output directory...')
+  logging.info('creating output directory...')
   path = Path(args.pathname)
   projectname = path.stem
-  path.mkdir(parents=True)
+  path.mkdir(parents=True, exist_ok=True)
 
-  print('downloading tiles...')
+  logging.info('downloading tiles...')
   tilesdir = path / 'cityjson'
-  tilesdir.mkdir()
+  tilesdir.mkdir(exist_ok=True)
   fnames = download_3dbag(tids, tilesdir)
   
-  print('export to obj...')
+  logging.info('export to obj...')
   objpath = (path / projectname).with_suffix('.obj')
   blendpath = (path / projectname).with_suffix('.blend')
   blendpy = path / 'blendersetup.py'
   prep_for_blender(fnames, objpath, origin_offset=args.poi)
 
-  print('preppring blend file')
+  logging.info('preppring blend file')
   with open( blendpy, 'w' ) as f:
     f.write("import bpy\n")
     f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', axis_forward='Y', axis_up='Z')\n".format( objpath ))
