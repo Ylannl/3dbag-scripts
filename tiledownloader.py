@@ -33,13 +33,12 @@ def download_3dbag(tile_ids, tilesdir):
     logging.info(url)
     fname = tilesdir / (tid+'.json')
     fnames.append(fname)
-    if not fname.exists():
-      try:
-        with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
-          data = response.read() # a `bytes` object
-          out_file.write( gzip.decompress(data) )
-      except urllib.error.HTTPError as err:
-        logging.warning(err)
+    try:
+      with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
+        data = response.read() # a `bytes` object
+        out_file.write( gzip.decompress(data) )
+    except urllib.error.HTTPError as err:
+      logging.warning(err)
   
   return fnames
 
@@ -135,4 +134,4 @@ if __name__ == '__main__':
     f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', axis_forward='Y', axis_up='Z')\n".format( objpath ))
     f.write("bpy.ops.wm.save_as_mainfile(filepath='{}')\n".format(blendpath))
   
-  subprocess.run(['blender', 'base.blend', '--background', '--python', blendpy])
+  subprocess.run(['~/blender-2.93.5-linux-x64/blender', 'base.blend', '--background', '--python', blendpy])

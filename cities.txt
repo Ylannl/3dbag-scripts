@@ -1,5 +1,3 @@
-python tiledownloader.py 121764.23 487175.93 5000 Amsterdam
-python tiledownloader.py 92910.10 435561.92 5000 Rotterdam
 python tiledownloader.py 81918 454555 5000 DenHaag
 python tiledownloader.py 135582.8 456511.0 5000 Utrecht
 python tiledownloader.py 176932.55 317434.65 5000 Maastrich
