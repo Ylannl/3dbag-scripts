@@ -16,3 +16,4 @@ python tiledownloader.py 145200 525512 5000 Enkhuizen
 python tiledownloader.py 115652 566376 10000 Texel
 python tiledownloader.py 134480.4 499420.8 5000 Volendam
 python tiledownloader.py 93816.1 463854.4 5000 Leiden
+python tiledownloader.py 105271.8 425530.0 5000 Dordrecht
