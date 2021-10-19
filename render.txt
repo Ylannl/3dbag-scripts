@@ -1,0 +1,9 @@
+~/blender-2.93.5-linux-x64/blender -b Amsterdam.blend -o /home/rypeters/git/3dbag-scripts/render/output/Amsterdam -a
+~/blender-2.93.5-linux-x64/blender -b Delft.blend -o /home/rypeters/git/3dbag-scripts/render/output/Delft -a
+~/blender-2.93.5-linux-x64/blender -b DenHaag.blend -o /home/rypeters/git/3dbag-scripts/render/output/DenHaag -a
+~/blender-2.93.5-linux-x64/blender -b Deventer.blend -o /home/rypeters/git/3dbag-scripts/render/output/Deventer -a
+~/blender-2.93.5-linux-x64/blender -b Gouda.blend -o /home/rypeters/git/3dbag-scripts/render/output/Gouda -a
+~/blender-2.93.5-linux-x64/blender -b Leiden.blend -o /home/rypeters/git/3dbag-scripts/render/output/Leiden -a
+~/blender-2.93.5-linux-x64/blender -b Maastrich.blend -o /home/rypeters/git/3dbag-scripts/render/output/Maastrich -a
+~/blender-2.93.5-linux-x64/blender -b Rotterdam.blend -o /home/rypeters/git/3dbag-scripts/render/output/Rotterdam -a
+~/blender-2.93.5-linux-x64/blender -b Utrecht.blend -o /home/rypeters/git/3dbag-scripts/render/output/Utrecht -a
