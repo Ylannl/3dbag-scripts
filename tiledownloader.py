@@ -134,4 +134,4 @@ if __name__ == '__main__':
     f.write("bpy.ops.import_scene.obj(filepath='{}', filter_glob='*.obj;*.mtl', use_edges=False, use_smooth_groups=False, use_split_objects=False, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='OFF', axis_forward='Y', axis_up='Z')\n".format( objpath ))
     f.write("bpy.ops.wm.save_as_mainfile(filepath='{}')\n".format(blendpath))
   
-  subprocess.run(['~/blender-2.93.5-linux-x64/blender', 'base.blend', '--background', '--python', blendpy])
+  subprocess.run(['/home/rypeters/blender-2.93.5-linux-x64/blender', 'base.blend', '--background', '--python', blendpy])
