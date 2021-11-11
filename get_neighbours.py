@@ -17,7 +17,7 @@ def get_all_tiles():
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("--pattern", help="filpath pattern where cityjson files can be found", type=str, default="/data/3DBAGv2/export/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json")
-  parser.add_argument("output", help="name of output file", type=str)
+  parser.add_argument("output", help="name of output file. Each line has 1st the center tile and then all its neighbours.", type=str)
   args = parser.parse_args()
 
   tiles = get_all_tiles()
