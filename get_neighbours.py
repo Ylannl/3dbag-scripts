@@ -1,6 +1,7 @@
 import argparse
 import json
 import csv
+from pathlib import Path
 
 from owslib.wfs import WebFeatureService
 from shapely.geometry import Polygon
@@ -26,9 +27,9 @@ if __name__ == '__main__':
 
   tile_neighbours = {}
   for idx, geom in tiles:
-    tile_neighbours[idx] = [ tiles_by_polyid[id(r)] for r in tree.query(geom) if id(r) != id(geom) ]
+    tile_neighbours[idx] = [ tiles_by_polyid[id(r)] for r in tree.query(geom) if id(r) != id(geom) and Path(args.pattern.format(TID=tiles_by_polyid[id(r)])).exists() ]
 
-  with open(args.output, 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile, delimiter=';')
+  with open(args.output, 'w') as csvfile:
     for tile, neighbours in tile_neighbours.items():
-      writer.writerow([args.pattern.format(TID=tile)] + [args.pattern.format(TID=n) for n in neighbours])
+      command = "/home/rypeters/git/urban-morphology-3d/venv/bin/python /home/rypeters/git/urban-morphology-3d/cityStats.py -dsn \"dbname=baseregisters\" -b -o {TID}_lod2_surface_areas.csv -- ".format(TID=tile)
+      csvfile.write(command + " " + args.pattern.format(TID=tile) + " " + " ".join([args.pattern.format(TID=n) for n in neighbours]) + "\n")
